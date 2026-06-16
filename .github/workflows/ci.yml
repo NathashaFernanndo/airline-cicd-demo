@@ -1,4 +1,4 @@
-name: Node.js CI Demo
+name: Airline CI/CD Pipeline
 
 on:
   push:
@@ -6,7 +6,8 @@ on:
       - main
 
 jobs:
-  test-app:
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -24,5 +25,60 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Success message
-        run: echo "🎉 CI pipeline completed successfully!"
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build app
+        run: |
+          mkdir build
+          cp server.js package.json package-lock.json build/
+          echo "Build completed successfully"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: airline-app-build
+          path: build/
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: airline-app-build
+          path: staging/
+
+      - name: Simulate staging deployment
+        run: |
+          echo "Deploying application to STAGING environment..."
+          echo "Version deployed to staging: ${{ github.sha }}" > staging/deployed-version.txt
+          cat staging/deployed-version.txt
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    environment: production
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: airline-app-build
+          path: production/
+
+      - name: Simulate production deployment
+        run: |
+          echo "Deploying application to PRODUCTION environment..."
+          echo "Version deployed to production: ${{ github.sha }}" > production/deployed-version.txt
+          cat production/deployed-version.txt
