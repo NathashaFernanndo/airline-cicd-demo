@@ -65,7 +65,7 @@ jobs:
           cat staging/deployed-version.txt
 
   deploy-production:
-    name: Deploy to Production
+    name: Deploy to IIS Production
     runs-on: ubuntu-latest
     needs: deploy-staging
     environment: production
@@ -77,8 +77,14 @@ jobs:
           name: airline-app-build
           path: production/
 
-      - name: Simulate production deployment
+      - name: Simulate Microsoft IIS deployment
         run: |
-          echo "Deploying application to PRODUCTION environment..."
-          echo "Version deployed to production: ${{ github.sha }}" > production/deployed-version.txt
-          cat production/deployed-version.txt
+          echo "Connecting to Microsoft IIS Server..."
+          echo "Stopping IIS Application Pool: AirlineAppPool"
+          echo "Copying build files to C:\inetpub\wwwroot\AirlineApp"
+          echo "Starting IIS Application Pool: AirlineAppPool"
+          echo "Deployment to IIS Production completed successfully."
+          echo "Version deployed to IIS Production: ${{ github.sha }}" > production/iis-deployment-log.txt
+          cat production/iis-deployment-log.txt
+
+
