@@ -5,7 +5,7 @@ const PORT = 3000;
 
 app.get("/", (req, res) => {
   res.send(`
-    <h1>✈️ SriLankan Airlines CI/CD Demo</h1>
+    <h1>✈️ SriLankan Airlines CI/CD Demo v2</h1>
     <p>This application was built to demonstrate GitHub Actions and CI/CD.</p>
   `);
 });
