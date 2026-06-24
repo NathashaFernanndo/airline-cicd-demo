@@ -34,10 +34,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build app
+      - name: Create build package
         run: |
           mkdir build
           cp server.js package.json package-lock.json build/
+          echo "Build created from commit: ${{ github.sha }}" > build/build-info.txt
           echo "Build completed successfully"
 
       - name: Upload build artifact
@@ -56,13 +57,23 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: airline-app-build
-          path: staging/
+          path: staging-deployment/
 
-      - name: Simulate staging deployment
+      - name: Create staging deployment log
         run: |
-          echo "Deploying application to STAGING environment..."
-          echo "Version deployed to staging: ${{ github.sha }}" > staging/deployed-version.txt
-          cat staging/deployed-version.txt
+          echo "STAGING DEPLOYMENT LOG" > staging-deployment/staging-log.txt
+          echo "Environment: Staging / UAT" >> staging-deployment/staging-log.txt
+          echo "Application: Airline CI/CD Demo" >> staging-deployment/staging-log.txt
+          echo "Commit deployed: ${{ github.sha }}" >> staging-deployment/staging-log.txt
+          echo "Deployment status: Successful" >> staging-deployment/staging-log.txt
+          echo "Purpose: Validate application before production" >> staging-deployment/staging-log.txt
+          cat staging-deployment/staging-log.txt
+
+      - name: Upload staging deployment record
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-deployment-record
+          path: staging-deployment/
 
   deploy-production:
     name: Deploy to IIS Production
@@ -75,16 +86,24 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: airline-app-build
-          path: production/
+          path: production-deployment/
 
-      - name: Simulate Microsoft IIS deployment
+      - name: Create IIS production deployment log
         run: |
-          echo "Connecting to Microsoft IIS Server..."
-          echo "Stopping IIS Application Pool: AirlineAppPool"
-          echo "Copying build files to C:\inetpub\wwwroot\AirlineApp"
-          echo "Starting IIS Application Pool: AirlineAppPool"
-          echo "Deployment to IIS Production completed successfully."
-          echo "Version deployed to IIS Production: ${{ github.sha }}" > production/iis-deployment-log.txt
-          cat production/iis-deployment-log.txt
+          echo "IIS PRODUCTION DEPLOYMENT LOG" > production-deployment/iis-production-log.txt
+          echo "Environment: Microsoft IIS Production" >> production-deployment/iis-production-log.txt
+          echo "Application Pool: AirlineAppPool" >> production-deployment/iis-production-log.txt
+          echo "IIS Path: C:\inetpub\wwwroot\AirlineApp" >> production-deployment/iis-production-log.txt
+          echo "Commit deployed: ${{ github.sha }}" >> production-deployment/iis-production-log.txt
+          echo "Step 1: Connected to IIS server - Simulated" >> production-deployment/iis-production-log.txt
+          echo "Step 2: Stopped IIS Application Pool - Simulated" >> production-deployment/iis-production-log.txt
+          echo "Step 3: Copied application files - Simulated" >> production-deployment/iis-production-log.txt
+          echo "Step 4: Started IIS Application Pool - Simulated" >> production-deployment/iis-production-log.txt
+          echo "Deployment status: Successful" >> production-deployment/iis-production-log.txt
+          cat production-deployment/iis-production-log.txt
 
-
+      - name: Upload IIS production deployment record
+        uses: actions/upload-artifact@v4
+        with:
+          name: iis-production-deployment-record
+          path: production-deployment/
